@@ -5,7 +5,7 @@ export default function Home() {
 	const [organization, setOrganization] = useState("");
 	const [appName, setAppName] = useState("");
 	const [url, setUrl] = useState("https://example.com");
-	const [callbackUrl, setCallbackUrl] = useState("");
+	const [callbackUrls, setCallbackUrls] = useState<string[]>(["", "", ""]);
 	const [webhookUrl, setWebhookUrl] = useState("");
 	const [origin, setOrigin] = useState("");
 	useEffect(() => {
@@ -14,7 +14,11 @@ export default function Home() {
 		setOrganization(params.get("organization") || "");
 		setAppName(params.get("appName") || "");
 		setUrl(params.get("url") || "https://example.com");
-		setCallbackUrl(params.get("callbackUrl") || "");
+		setCallbackUrls([
+			params.get("callbackUrl1") || "",
+			params.get("callbackUrl2") || "",
+			params.get("callbackUrl3") || "",
+		]);
 		setWebhookUrl(params.get("webhookUrl") || "");
 	}, []);
 	const target = `https://github.com/organizations/${organization}/settings/apps/new?state=newlycreated`;
@@ -62,15 +66,43 @@ export default function Home() {
 						}}
 					/>
 
-					<label htmlFor="callbackUrl">Callback URL:</label>
+					<label htmlFor="callbackUrl1">Callback URL 1:</label>
 					<input
-						id="callbackUrl"
+						id="callbackUrl1"
 						type="url"
 						required
 						placeholder="e.g. https://keycloak.example.com/realms/appthrust-console/broker/github/endpoint"
-						value={callbackUrl}
+						value={callbackUrls[0]}
 						onChange={(e) => {
-							setCallbackUrl(e.target.value);
+							const newUrls = [...callbackUrls];
+							newUrls[0] = e.target.value;
+							setCallbackUrls(newUrls);
+						}}
+					/>
+
+					<label htmlFor="callbackUrl2">Callback URL 2:</label>
+					<input
+						id="callbackUrl2"
+						type="url"
+						placeholder="e.g. https://keycloak.example.com/realms/appthrust-console/broker/github/endpoint"
+						value={callbackUrls[1]}
+						onChange={(e) => {
+							const newUrls = [...callbackUrls];
+							newUrls[1] = e.target.value;
+							setCallbackUrls(newUrls);
+						}}
+					/>
+
+					<label htmlFor="callbackUrl3">Callback URL 3:</label>
+					<input
+						id="callbackUrl3"
+						type="url"
+						placeholder="e.g. https://keycloak.example.com/realms/appthrust-console/broker/github/endpoint"
+						value={callbackUrls[2]}
+						onChange={(e) => {
+							const newUrls = [...callbackUrls];
+							newUrls[2] = e.target.value;
+							setCallbackUrls(newUrls);
 						}}
 					/>
 
@@ -94,7 +126,7 @@ export default function Home() {
 							value={JSON.stringify(
 								manifest({
 									name: appName,
-									callbackUrl,
+									callbackUrls,
 									webhookUrl,
 									redirectUrl: `${origin}/redirect`,
 								}),
@@ -116,12 +148,12 @@ export default function Home() {
 // https://github.com/organizations/{organization_name}/settings/apps/new?webhook_active=true&contents=read&emails=read&events=push
 function manifest({
 	name,
-	callbackUrl,
+	callbackUrls,
 	webhookUrl,
 	redirectUrl,
 }: Readonly<{
 	name: string;
-	callbackUrl: string;
+	callbackUrls: string[];
 	webhookUrl: string;
 	redirectUrl: string;
 }>) {
@@ -129,7 +161,7 @@ function manifest({
 		name,
 		url: "https://www.example.com",
 		public: false,
-		callback_urls: [callbackUrl],
+		callback_urls: callbackUrls.filter((url) => url !== ""),
 		hook_attributes: {
 			url: webhookUrl || "https://example.com",
 			active: !!webhookUrl,
