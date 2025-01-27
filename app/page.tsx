@@ -78,7 +78,6 @@ export default function Home() {
 					<input
 						id="webhookUrl"
 						type="url"
-						required
 						placeholder="e.g. https://api.example.com/webhooks/github"
 						value={webhookUrl}
 						onChange={(e) => {
@@ -132,8 +131,8 @@ function manifest({
 		public: false,
 		callback_urls: [callbackUrl],
 		hook_attributes: {
-			url: webhookUrl,
-			active: true,
+			url: webhookUrl || "https://example.com",
+			active: !!webhookUrl,
 		},
 		default_permissions: {
 			contents: "read",
